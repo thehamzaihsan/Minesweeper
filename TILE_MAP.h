@@ -3,6 +3,7 @@
 #include <cstdlib> 
 #include <iostream> 
 #include <time.h> 
+#include <string>
 
 #include "Game.h"
 #include "Tile.h"
@@ -10,20 +11,21 @@
 const int WINDOW_HEIGTH = 640;
 const int WINDOW_WIDTH = 640;
 const int TILE_WIDTH = 40;
-
-
+const int BOMB_NUMBER = 20;
 
 
 class TileMap {
 private:
     Tile tile_array[WINDOW_HEIGTH / TILE_WIDTH][WINDOW_WIDTH / TILE_WIDTH];
+    bool isExploded;
 public:
     void init() {
+        isExploded = false;
         srand(time(0));
-        int temp_mines_array_i[10];
-        int temp_mines_array_j[10];
+        int temp_mines_array_i[BOMB_NUMBER] = {};
+        int temp_mines_array_j[BOMB_NUMBER] = {};
 
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < BOMB_NUMBER ; i++)
         {
             int random_value_i = (rand() % 14) + 1;
             int random_value_j = (rand() % 14) + 1;
@@ -60,7 +62,7 @@ public:
                 tile_array[i][j].setnumber(0);
                 tile_array[i][j].sethidden_state(false);
 
-                for (int k = 0; k < 9; k++)
+                for (int k = 0; k < BOMB_NUMBER; k++)
                 {
                     if (i == temp_mines_array_i[k] && j == temp_mines_array_j[k])
                     {
@@ -114,33 +116,35 @@ public:
             {
 
 
-                if (tile_array[i][j].getnumber() == -1)
-                {
-                    tile_array[i][j].setFillColor(sf::Color::Red);
-                }
+                
 
                 if (tile_array[i][j].getnumber() == -2)
                 {
                     tile_array[i][j].setFillColor(sf::Color::Cyan);
                 }
+                
+                else 
+                {
+                    if (tile_array[i][j].getnumber() != 0)
+                    {
+                        tile_array[i][j].setInnerText(std::to_string(tile_array[i][j].getnumber()));
+                    }
 
-                if (tile_array[i][j].getnumber() == 0)
-                {
-                    tile_array[i][j].setFillColor(sf::Color::Black);
                 }
+                 
 
-                if (tile_array[i][j].getnumber() == 1)
-                {
-                    tile_array[i][j].setFillColor(sf::Color::Blue);
-                }
-                if (tile_array[i][j].getnumber() == 2)
-                {
-                    tile_array[i][j].setFillColor(sf::Color::Yellow);
-                }
-                if (tile_array[i][j].getnumber() == 3)
-                {
-                    tile_array[i][j].setFillColor(sf::Color::Magenta);
-                }
+                //if (tile_array[i][j].getnumber() == 1)
+                //{
+                //    tile_array[i][j].setFillColor(sf::Color::Blue);
+                //}
+                //if (tile_array[i][j].getnumber() == 2)
+                //{
+                //    tile_array[i][j].setFillColor(sf::Color::Yellow);
+                //}
+                //if (tile_array[i][j].getnumber() == 3)
+                //{
+                //    tile_array[i][j].setFillColor(sf::Color::Magenta);
+                //}
 
             }
 
@@ -156,5 +160,44 @@ public:
         return tile_array[a][b];
     }
 
+    void Explode() {
+        for (int i = 0; i < WINDOW_HEIGTH / TILE_WIDTH; i++)
+        {
+            for (int j = 0; j < WINDOW_WIDTH / TILE_WIDTH; j++)
+            {
+
+
+                if (tile_array[i][j].getnumber() == -1)
+                {
+                    tile_array[i][j].setFillColor(sf::Color::Red);
+                    tile_array[i][j].sethidden_state(false);
+
+
+                }
+
+
+
+            }
+        }
+
+       
+    }
+
+
+
+    void HideCell(int i, int j) {
+        tile_array[i][j].sethidden_state(true);
+    }
+
+    
+
+
+
+    bool getIsExploded() {
+        return isExploded;
+    }
+
+    void Update(); 
+    void ClearSpace(int i, int j);
 };
 
