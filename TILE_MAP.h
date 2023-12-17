@@ -3,186 +3,200 @@
 #include <cstdlib> 
 #include <iostream> 
 #include <time.h> 
-#include <set>
 #include <string>
-#include <vector>
+
 #include "Game.h"
 #include "Tile.h"
 
+const int WINDOW_HEIGTH = 640;
+const int WINDOW_WIDTH = 640;
+const int TILE_WIDTH = 40;
+const int BOMB_NUMBER = 20;
 
-struct Point {
-	int x;
-	int y;
-
-	// Define comparison operators
-	bool operator<(const Point& other) const {
-		return x < other.x || (x == other.x && y < other.y);
-	}
-
-	// Add other operators if needed
-};
 
 class TileMap {
 private:
-	Tile tile_array[WINDOW_HEIGTH / TILE_WIDTH][WINDOW_WIDTH / TILE_WIDTH];
-	bool isExploded;
-	std::set<Point> RandomNumbers;
+    Tile tile_array[WINDOW_HEIGTH / TILE_WIDTH][WINDOW_WIDTH / TILE_WIDTH];
+    bool isExploded;
 public:
-	TileMap() {
-		RandomNumbers = SetRandomBombs();
-		for (int row = 0; row < 16; row++)
-		{
-			for (int column = 0; column < 16; column++)
-			{
-				for (const auto& value : RandomNumbers) {
-					if (value.x == row && value.y == column)
-					{
-						tile_array[row][column].setnumber(-1);
-						tile_array[row][column].setFillColor(sf::Color::Red);
-					}
-				}
-				tile_array[row][column].setGridPosition(row, column);
-			}
-		}
+    void init() {
+        isExploded = false;
+        srand(time(0));
+        int temp_mines_array_i[BOMB_NUMBER] = {};
+        int temp_mines_array_j[BOMB_NUMBER] = {};
 
-		for (int row = 0; row < 16; row++)
-		{
-			for (int column = 0; column < 16; column++)
-			{
-				setNumberData(row, column);
-			}
-		}
-	}
+        for (int i = 0; i < BOMB_NUMBER; i++)
+        {
+            int random_value_i = (rand() % 14) + 1;
+            int random_value_j = (rand() % 14) + 1;
 
-	void setNumberData(int i, int j) {
+            temp_mines_array_i[i] = random_value_i;
+            temp_mines_array_j[i] = random_value_j;
 
-		if (tile_array[i][j].getnumber() >= 0 && i <= 14 && j <=14 && i >= 1 && j >= 1 ) {
-			if (tile_array[i + 1][j].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i][j + 1].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i - 1][j].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i][j - 1].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i + 1][j + 1].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i - 1][j + 1].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i - 1][j - 1].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-			if (tile_array[i + 1][j - 1].getnumber() == -1) {
-				tile_array[i][j]++;
-			}
-		}
-	}
+            /*if (i == 0)
+            {
 
-	std::set <Point>  SetRandomBombs() {
-		std::set<Point> uniquePoints;
-		std::srand(std::time(0));  // Seed for random number generation
+            }
+            else {
+                for (int j = 0; j < i; j++)
+                {
 
-		while (uniquePoints.size() < 20) {
-			Point p;
-			p.x = std::rand() % 14 + 1; // Range: 1 to 15
-			p.y = std::rand() % 14 + 1; // Range: 1 to 15
+                    if (random_value == temp_mines_array[j])
+                    {
+                        break;
+                    }
+                    temp_mines_array[i] = random_value;
+                }
+            }*/
 
-			// Ensure the point is unique
-			if (uniquePoints.find(p) == uniquePoints.end())
-			{
-				uniquePoints.insert(p);
-			}
-		}
+        }
 
-		return uniquePoints;
-	}
+        for (int i = 0; i < WINDOW_HEIGTH / TILE_WIDTH; i++)
+        {
+            for (int j = 0; j < WINDOW_WIDTH / TILE_WIDTH; j++)
+            {
+                tile_array[i][j].setFillColor(sf::Color::White);
+                tile_array[i][j].setSize(sf::Vector2f(TILE_WIDTH - 1, TILE_WIDTH - 1));
+                tile_array[i][j].setOrigin(sf::Vector2f(0, 0));
+                tile_array[i][j].setPosition(sf::Vector2f(TILE_WIDTH * i, TILE_WIDTH * j));
+                tile_array[i][j].setnumber(0);
+                tile_array[i][j].sethidden_state(false);
 
-	void setcolor() {
+                for (int k = 0; k < BOMB_NUMBER; k++)
+                {
+                    if (i == temp_mines_array_i[k] && j == temp_mines_array_j[k])
+                    {
+                        tile_array[i][j].setnumber(-1);
+                    }
+                }
 
-	}
+                if (i == 0 || j == 0 || i == 15 || j == 15) {
+                    tile_array[i][j].setnumber(-2);
+                }
+            }
+        }
 
-	void Click();
-	void ClearSpace(int i , int j) {
-		//if (tile_array[i + 1][j].getnumber() >= 0) {
-		//	ShowCell(i + 1, j);
-		//	//ClearSpace(i + 1, j);
-		//}
-		//if (tile_array[i][j + 1].getnumber() >= 0) {
-		//	ShowCell(i, j + 1);
-		//	//ClearSpace(i, j + 1);
-		//}
-		//if (tile_array[i - 1][j].getnumber() >= 0) {
-		//	ShowCell(i - 1, j);
-		//	//ClearSpace(i - 1, j);
-		//}
-		//if (tile_array[i][j - 1].getnumber() >= 0) {
-		//	ShowCell(i, j - 1);
-		//	//ClearSpace(i, j - 1);
-		//}
-		//if (tile_array[i + 1][j + 1].getnumber() >= 0) {
-		//	ShowCell(i + 1, j + 1);
-		//	//ClearSpace(i + 1, j + 1);
-		//}
-		//if (tile_array[i - 1][j + 1].getnumber() >= 0) {
-		//	ShowCell(i - 1, j + 1);
-		//	//ClearSpace(i - 1, j + 1);
-		//}
-		//if (tile_array[i - 1][j - 1].getnumber() >= 0) {
-		//	ShowCell(i - 1, j - 1);
-		//	//ClearSpace(i - 1, j - 1);
-		//}
-		//if (tile_array[i + 1][j - 1].getnumber() >= 0) {
-		//	ShowCell(i + 1, j - 1);
-		//	//ClearSpace(i + 1, j - 1);
-		//}
+        for (int i = 0; i < WINDOW_HEIGTH / TILE_WIDTH - 1; i++)
+        {
+            for (int j = 0; j < WINDOW_WIDTH / TILE_WIDTH - 1; j++)
+            {
+                if (tile_array[i][j].getnumber() >= 0) {
+                    if (tile_array[i + 1][j].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i][j + 1].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i - 1][j].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i][j - 1].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i + 1][j + 1].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i - 1][j + 1].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i - 1][j - 1].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                    if (tile_array[i + 1][j - 1].getnumber() == -1) {
+                        tile_array[i][j]++;
+                    }
+                }
 
-	}
-	void setIsExploded(bool b) {
-		isExploded = b;
-	}
-	bool getIsExploded() {
-		return isExploded;
-	}
-	Tile getMapElement(int i, int j) {
-		return tile_array[i][j];
-	}
+            }
+        }
 
-	void DestroyCell() {
+        for (int i = 0; i < WINDOW_HEIGTH / TILE_WIDTH; i++)
+        {
+            for (int j = 0; j < WINDOW_WIDTH / TILE_WIDTH; j++)
+            {
 
-	}
 
-	void ShowCell(int i, int j) {
-		tile_array[i][j].sethidden_state(false);
-		
-	}
 
-	void setFlagged(int i, int j, bool b) {
-		tile_array[i][j].setFlagged(b);
-	}
 
-	void Update() {
+                if (tile_array[i][j].getnumber() == -2)
+                {
+                    tile_array[i][j].setFillColor(sf::Color::Cyan);
+                }
 
-		for (int row = 0; row < 16; row++)
-		{
-			for (int column = 0; column < 16; column++)
-			{
-				if (tile_array[row][column].gethidden_state() == false) {
-					tile_array[row][column].setFillColor(sf::Color::Black);
+                else
+                {
+                    if (tile_array[i][j].getnumber() != 0)
+                    {
+                        tile_array[i][j].setInnerText(std::to_string(tile_array[i][j].getnumber()));
+                    }
 
-					if (tile_array[row][column].getnumber() == 0)
-					{
-						ClearSpace(row, column);
-					}
-				}
-			}
-		}
-	}
+                }
 
+
+                //if (tile_array[i][j].getnumber() == 1)
+                //{
+                //    tile_array[i][j].setFillColor(sf::Color::Blue);
+                //}
+                //if (tile_array[i][j].getnumber() == 2)
+                //{
+                //    tile_array[i][j].setFillColor(sf::Color::Yellow);
+                //}
+                //if (tile_array[i][j].getnumber() == 3)
+                //{
+                //    tile_array[i][j].setFillColor(sf::Color::Magenta);
+                //}
+
+            }
+
+        }
+
+
+
+
+
+    }
+
+    Tile getMapElement(int a, int b) {
+        return tile_array[a][b];
+    }
+
+    void Explode() {
+        for (int i = 0; i < WINDOW_HEIGTH / TILE_WIDTH; i++)
+        {
+            for (int j = 0; j < WINDOW_WIDTH / TILE_WIDTH; j++)
+            {
+
+
+                if (tile_array[i][j].getnumber() == -1)
+                {
+                    tile_array[i][j].setFillColor(sf::Color::Red);
+                    tile_array[i][j].sethidden_state(false);
+
+
+                }
+
+
+
+            }
+        }
+
+
+    }
+
+
+
+    void HideCell(int i, int j) {
+        tile_array[i][j].sethidden_state(true);
+    }
+
+
+
+
+
+    bool getIsExploded() {
+        return isExploded;
+    }
+
+    void Update();
+    void ClearSpace(int i, int j);
 };
-

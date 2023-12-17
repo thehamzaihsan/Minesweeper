@@ -26,97 +26,44 @@ private:
 Game::Game()
 {
 	window.create(sf::VideoMode(WINDOW_HEIGTH, WINDOW_WIDTH), "SFML works!", sf::Style::Close);
-	window.setFramerateLimit(10000);
+
+
+
+
 }
 
 
 void Game::Start() {
 
+	tile_map.init();
 }
 
 void Game::Update() {
+	tile_map.Update();
+	int i = event.mouseButton.x / 40;
+	int j = event.mouseButton.y / 40;
 
-
-	if (!tile_map.getIsExploded())
+	if (tile_map.getIsExploded() == false)
 	{
-		sf::Vector2i pos = sf::Mouse::getPosition(window);
-		int x = pos.x / TILE_WIDTH;
-		int y = pos.y / TILE_WIDTH;
-
+		bool click_lock = false;
 		if (event.type == sf::Event::MouseButtonPressed)
 		{
-			if (event.key.code == sf::Mouse::Left)
-			{
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && click_lock == false) {
 
-				Tile tile_d = tile_map.getMapElement(x, y);
-				if (tile_d.getFlaggedStatus() == false && tile_d.getnumber() >= -1 && tile_d.gethidden_state() == true)
-				{
-					tile_map.ShowCell(x, y);
-				
 
-				}
-
+				std::cout << i << "-" << j << std::endl;
+				tile_map.HideCell(i, j);
+				click_lock = true;
 			}
 		}
-		/*		bool click_lock = false;
-		if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left) && click_lock == false )
-		{
-			std::cout << "Pressed";
-
-
-				int i = event.mouseButton.x / 40;
-				int j = event.mouseButton.y / 40;
-
-				Tile tile_d = tile_map.getMapElement(i, j);
-				if (tile_d.getFlaggedStatus() == false && tile_d.getnumber() >= -1 && tile_d.gethidden_state() == true )
-				{
-					tile_map.ShowCell(i, j);
-					click_lock = true;
-
-				}
-
-		}
-
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && click_lock == true) {
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && click_lock == false) {
 				click_lock = false;
 			}
-		}*/
-
-		tile_map.Update();
-
-		bool click_lock_right = false;
-		if (event.type == sf::Event::MouseButtonPressed)
-		{
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && click_lock_right == false) {
-
-				int i = event.mouseButton.x / 40;
-				int j = event.mouseButton.y / 40;
-
-				if (tile_map.getMapElement(i, j).getFlaggedStatus() == false && click_lock_right == false)
-				{
-					tile_map.setFlagged(i, j, true);
-					click_lock_right = true;
-
-				}
-				else if (tile_map.getMapElement(i, j).getFlaggedStatus() == true && click_lock_right == false)
-				{
-					tile_map.setFlagged(i, j, false);
-					click_lock_right = true;
-
-				}
-
-			}
-		}
-		else if (event.type == sf::Event::MouseButtonReleased)
-		{
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && click_lock_right == true) {
-				click_lock_right = false;
-			}
 		}
 
-
+		std::cout << tile_map.getMapElement(10, 0).getInnerText().getPosition().x;
 	}
 
 
@@ -136,8 +83,6 @@ void Game::Render() {
 			{
 				window.draw(tile_map.getMapElement(i, j).getInnerText());
 			}
-
-			window.draw(tile_map.getMapElement(i, j).getSprite());
 		}
 	}
 
@@ -145,3 +90,75 @@ void Game::Render() {
 }
 
 
+void TileMap::Update() {
+
+	for (int i = 0; i < WINDOW_HEIGTH / TILE_WIDTH; i++)
+	{
+		for (int j = 0; j < WINDOW_WIDTH / TILE_WIDTH; j++)
+		{
+			if (tile_array[i][j].gethidden_state() == true && tile_array[i][j].getnumber() == 0)
+			{
+				tile_array[i][j].setFillColor(sf::Color::Black);
+
+				HideCell(i, j);
+				ClearSpace(i, j);
+			}
+
+			if (tile_array[i][j].gethidden_state() == true && tile_array[i][j].getnumber() == -1)
+			{
+				Explode();
+				isExploded = true;
+			}
+
+			if (tile_array[i][j].gethidden_state() == true)
+			{
+				tile_array[i][j].setFillColor(sf::Color{ 198 , 198 , 198 , 100 });
+			}
+		}
+	}
+
+
+}
+
+
+void TileMap::ClearSpace(int i, int j) {
+
+
+
+
+	if (tile_array[i + 1][j].getnumber() >= 0) {
+		HideCell(i + 1, j);
+		//ClearSpace(i + 1, j);
+	}
+	if (tile_array[i][j + 1].getnumber() >= 0) {
+		HideCell(i, j + 1);
+		//ClearSpace(i, j + 1);
+	}
+	if (tile_array[i - 1][j].getnumber() >= 0) {
+		HideCell(i - 1, j);
+		//ClearSpace(i - 1, j);
+	}
+	if (tile_array[i][j - 1].getnumber() >= 0) {
+		HideCell(i, j - 1);
+		//ClearSpace(i, j - 1);
+	}
+	if (tile_array[i + 1][j + 1].getnumber() >= 0) {
+		HideCell(i + 1, j + 1);
+		//ClearSpace(i + 1, j + 1);
+	}
+	if (tile_array[i - 1][j + 1].getnumber() >= 0) {
+		HideCell(i - 1, j + 1);
+		//ClearSpace(i - 1, j + 1);
+	}
+	if (tile_array[i - 1][j - 1].getnumber() >= 0) {
+		HideCell(i - 1, j - 1);
+		//ClearSpace(i - 1, j - 1);
+	}
+	if (tile_array[i + 1][j - 1].getnumber() >= 0) {
+		HideCell(i + 1, j - 1);
+		//ClearSpace(i + 1, j - 1);
+	}
+
+
+
+}
