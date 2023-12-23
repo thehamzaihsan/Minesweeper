@@ -137,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
+    <ClInclude Include="ScoreWindow.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TILE_MAP.h" />
   </ItemGroup>

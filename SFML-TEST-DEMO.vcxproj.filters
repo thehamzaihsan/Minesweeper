@@ -29,5 +29,8 @@
     <ClInclude Include="TILE_MAP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScoreWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
