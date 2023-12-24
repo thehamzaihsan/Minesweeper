@@ -133,13 +133,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="ScoreWindow.cpp" />
     <ClCompile Include="SFML-TEST-DEMO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
     <ClInclude Include="ScoreWindow.h" />
     <ClInclude Include="Tile.h" />
-    <ClInclude Include="TILE_MAP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
